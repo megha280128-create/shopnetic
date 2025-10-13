@@ -1,40 +1,40 @@
 import React from 'react';
+import { SafeAreaView, Text } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Text, SafeAreaView } from 'react-native';
-import CartScreen from "./Screen/CartScreen.jsx"
-import HomeScreen from "./Screen/HomeScreen.jsx"
-import SearchScreen from "./Screen/SearchScreen.jsx"
-import ProductDetails from './Screen/ProductDetails.jsx'
-import UserScreen from './Screen/UserScreen.jsx'
+import { CartProvider } from './CartContext.jsx';
+
+// Screens
+import HomeScreen from './Screen/HomeScreen.jsx';
+import SearchScreen from './Screen/SearchScreen.jsx';
+import CartScreen from './Screen/CartScreen.jsx';
+import UserScreen from './Screen/UserScreen.jsx';
+import ProductDetails from './Screen/ProductDetails.jsx';
 import LoginScreen from './Screen/LoginScreen.jsx';
 import SignupScreen from './Screen/SignupScreen.jsx';
 
-
+// Navigator instances
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
-
-
+// Notification Screen
 const NotificationScreen = () => (
   <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <Text>Notifications</Text>
   </SafeAreaView>
 );
 
-// Tab Navigator with Icons
+// Bottom Tab Navigator
 const TabNavigator = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
       headerShown: false,
-      // tabBarStyle: { display: 'none' },
       tabBarIcon: ({ focused, color, size }) => {
         let iconName;
-
         if (route.name === 'Home') {
           iconName = focused ? 'home' : 'home-outline';
         } else if (route.name === 'Search') {
@@ -44,39 +44,40 @@ const TabNavigator = () => (
         } else if (route.name === 'User') {
           iconName = focused ? 'person' : 'person-outline';
         }
-
         return <Ionicons name={iconName} size={size} color={color} />;
       },
       tabBarActiveTintColor: '#e91e63',
       tabBarInactiveTintColor: 'gray',
     })}
   >
-    <Tab.Screen name="Home" component={HomeScreen} options ={{headerShown:false}} />
-    <Tab.Screen name="Search" component={SearchScreen} options ={{headerShown:false}} />
-    <Tab.Screen name="Cart" component={CartScreen} options ={{headerShown:false}} />
-    <Tab.Screen name="User" component={UserScreen} options={{ title: 'User' }} />
+    <Tab.Screen name="Home" component={HomeScreen} />
+    <Tab.Screen name="Search" component={SearchScreen} />
+    <Tab.Screen name="Cart" component={CartScreen} />
+    <Tab.Screen name="User" component={UserScreen} />
   </Tab.Navigator>
 );
+
 // Stack Navigator
 const MainStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false }} />
-    <Stack.Screen name="Notifications" component={NotificationScreen}  />
-    <Stack.Screen name="CartDetails" component={CartScreen} options={{ title: 'Cart Details' }} />
+    <Stack.Screen name="Notifications" component={NotificationScreen} />
+    <Stack.Screen name="ProductDetails" component={ProductDetails} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 
-// Drawer Navigator
+// Drawer Navigator (Main App Navigation)
 const App = () => (
-  <NavigationContainer>
-    <Drawer.Navigator>
-      <Drawer.Screen name="Shopnetic" component={MainStack} />
-      <Drawer.Screen name ="Profile" component ={UserScreen}/>
-      <Drawer.Screen name="ProductDetails" component={ProductDetails} />
-      <Drawer.Screen name="login" component={LoginScreen} />
-      <Drawer.Screen name="signup" component={SignupScreen} />
-    </Drawer.Navigator>
-  </NavigationContainer>
+  <CartProvider>
+    <NavigationContainer>
+      <Drawer.Navigator initialRouteName="Shopnetic">
+        <Drawer.Screen name="Shopnetic" component={MainStack} />
+        <Drawer.Screen name="Profile" component={UserScreen} />
+        <Drawer.Screen name="Login" component={LoginScreen} />
+        <Drawer.Screen name="Signup" component={SignupScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+  </CartProvider>
 );
 
 export default App;

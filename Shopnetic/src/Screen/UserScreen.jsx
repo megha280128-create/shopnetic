@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,60 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  TextInput,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserScreen = () => {
   const [facing, setFacing] = useState('front');
   const [permission, requestPermission] = useCameraPermissions();
   const [showCamera, setShowCamera] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
-  const [userName, setUserName] = useState('Ankit Kumar'); 
+  const [userName, setUserName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [editMode, setEditMode] = useState(false);
   const ref = useRef(null);
+
+  // Load stored data when screen loads
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('userProfile');
+        if (storedData) {
+          const parsed = JSON.parse(storedData);
+          setUserName(parsed.userName);
+          setEmail(parsed.email);
+          setPhone(parsed.phone);
+          setProfilePic(parsed.profilePic);
+        }
+      } catch (err) {
+        console.log('Error loading profile data:', err);
+      }
+    };
+    loadData();
+  }, []);
+
+  const saveProfile = async () => {
+    if (!userName || !email || !phone) {
+      Alert.alert('Please fill all fields');
+      return;
+    }
+
+    try {
+      const userData = { userName, email, phone, profilePic };
+      await AsyncStorage.setItem('userProfile', JSON.stringify(userData));
+      Alert.alert('Profile Saved Successfully!');
+      setEditMode(false);
+    } catch (err) {
+      console.log('Error saving profile data:', err);
+    }
+  };
 
   if (!permission) return <View />;
 
@@ -67,34 +111,114 @@ const UserScreen = () => {
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>My Profile</Text>
-      <TouchableOpacity onPress={handleShowCamera}>
-        <Image
-          source={
-            profilePic
-              ? { uri: profilePic }
-              : require('../../assets/user.png') 
-          }
-          style={styles.avatar}
-        />
-      </TouchableOpacity>
-      <Text style={styles.name}>{userName}</Text>
-      <Text style={styles.subText}>Tap the picture to update</Text>
+  if (!editMode) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.title}>My Profile</Text>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoLabel}>Email</Text>
-        <Text style={styles.infoValue}>ankit2914978@gmail.com</Text>
-        <Text style={styles.infoLabel}>Phone</Text>
-        <Text style={styles.infoValue}>+918707538123</Text>
-      </View>
-    </SafeAreaView>
+        <TouchableOpacity onPress={handleShowCamera}>
+          <Image
+            source={
+              profilePic
+                ? { uri: profilePic }
+                : require('../../assets/user.png')
+            }
+            style={styles.avatar}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.name}>{userName || 'Your Name'}</Text>
+        <Text style={styles.subText}>Tap Edit to update your info</Text>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>Email</Text>
+          <Text style={styles.infoValue}>{email || 'Not added yet'}</Text>
+          <Text style={styles.infoLabel}>Phone</Text>
+          <Text style={styles.infoValue}>{phone || 'Not added yet'}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.saveButton, { backgroundColor: '#2ecc71' }]}
+          onPress={() => setEditMode(true)}
+        >
+          <Text style={styles.saveButtonText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.title}>Edit Profile</Text>
+
+        <TouchableOpacity onPress={handleShowCamera}>
+          <Image
+            source={
+              profilePic
+                ? { uri: profilePic }
+                : require('../../assets/user.png')
+            }
+            style={styles.avatar}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.subText}>Tap to change profile picture</Text>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your name"
+            value={userName}
+            onChangeText={setUserName}
+          />
+
+          <Text style={styles.infoLabel}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
+
+          <Text style={styles.infoLabel}>Phone</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your phone number"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+          />
+        </View>
+
+        <View style={{ flexDirection: 'row', marginTop: 30 }}>
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: '#3498db', flex: 1, marginRight: 8 }]}
+            onPress={saveProfile}
+          >
+            <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: '#e74c3c', flex: 1 }]}
+            onPress={() => setEditMode(false)}
+          >
+            <Text style={styles.saveButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 export default UserScreen;
 
+// ----------------------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -102,6 +226,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
     paddingHorizontal: 20,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 100,
   },
   title: {
     fontSize: 28,
@@ -143,6 +275,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111',
     fontWeight: '500',
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    fontSize: 16,
+    paddingVertical: 6,
+    color: '#111',
+  },
+  saveButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    marginTop:8,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
   },
   permissionText: {
     fontSize: 18,
