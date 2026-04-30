@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../CartContext';
+import { formatINR } from '../utils/formatCurrency';
 
 const ProductDetails = ({ route, navigation }) => {
   const { product } = route.params;
@@ -29,7 +30,7 @@ const ProductDetails = ({ route, navigation }) => {
             <Image source={{ uri: product.image }} style={styles.detailImage} />
             <View style={styles.detailInfo}>
               <Text style={styles.detailTitle}>{product.title}</Text>
-              <Text style={styles.detailPrice}>${product.price.toFixed(2)}</Text>
+              <Text style={styles.detailPrice}>{formatINR(product.price)}</Text>
               <Text style={styles.detailDescription}>{product.description}</Text>
             </View>
           </>

@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import ProductScreen from "./ProductScreen.jsx"
 import ProductDetails from "./ProductDetails.jsx"
+import { formatINR } from '../utils/formatCurrency';
 
 const HomeScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
@@ -65,7 +66,7 @@ const HomeScreen = ({ navigation }) => {
         <Text numberOfLines={1} style={styles.productTitle}>
           {item.title}
         </Text>
-        <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+        <Text style={styles.productPrice}>{formatINR(item.price)}</Text>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={16} color="#FFD700" />
           <Text style={styles.ratingText}>

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../CartContext';
+import { formatINR } from '../utils/formatCurrency';
 
 const CartScreen = ({ navigation }) => {
   const { cartItems, total, dispatch } = useCart();
@@ -32,7 +33,7 @@ const CartScreen = ({ navigation }) => {
       <Image source={{ uri: item.image }} style={styles.image} />
       <View style={styles.info}>
         <Text numberOfLines={1} style={styles.title}>{item.title}</Text>
-        <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+        <Text style={styles.price}>{formatINR(item.price)}</Text>
 
         <View style={styles.qtyRow}>
           <TouchableOpacity onPress={() => handleDecrease(item)}>
@@ -78,7 +79,7 @@ const CartScreen = ({ navigation }) => {
       />
 
       <View style={styles.totalBar}>
-        <Text style={styles.totalText}>Total: ${total.toFixed(2)}</Text>
+        <Text style={styles.totalText}>Total: {formatINR(total)}</Text>
         <TouchableOpacity style={styles.checkoutButton}>
           <Text style={styles.checkoutText}>Checkout</Text>
         </TouchableOpacity>

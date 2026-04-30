@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { formatINR } from '../utils/formatCurrency';
 
 const SearchScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
@@ -89,7 +90,7 @@ const SearchScreen = ({ navigation }) => {
         <Text numberOfLines={1} style={styles.productTitle}>
           {item.title}
         </Text>
-        <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+        <Text style={styles.productPrice}>{formatINR(item.price)}</Text>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={16} color="#FFD700" />
           <Text style={styles.ratingText}>
